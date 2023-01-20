@@ -1,11 +1,20 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from '@next/font/google'
-import styles from '@/styles/Home.module.css'
+import Head from "next/head";
+import Image from "next/image";
+import { Inter } from "@next/font/google";
+import styles from "@/styles/Home.module.css";
+import { getSession } from "next-auth/react";
+import AccessDenied from "@/components/accessDenied";
+import { useRouter } from "next/router";
+import { signOut } from "next-auth/react";
+const inter = Inter({ subsets: ["latin"] });
 
-const inter = Inter({ subsets: ['latin'] })
+export default function Home({ session }) {
+  let router = useRouter();
 
-export default function Home() {
+  if (!session && typeof window !== "undefined") {
+    router.push("/auth/signIn");
+  }
+
   return (
     <>
       <Head>
@@ -26,7 +35,7 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              By{' '}
+              By{" "}
               <Image
                 src="/vercel.svg"
                 alt="Vercel Logo"
@@ -60,6 +69,14 @@ export default function Home() {
         </div>
 
         <div className={styles.grid}>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              signOut();
+            }}
+          >
+            SIGN OUT
+          </button>
           <a
             href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
             className={styles.card}
@@ -119,5 +136,16 @@ export default function Home() {
         </div>
       </main>
     </>
-  )
+  );
+}
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  console.log("SESS", session);
+  return {
+    props: {
+      session,
+    },
+  };
 }
