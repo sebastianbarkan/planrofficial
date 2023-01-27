@@ -2,9 +2,9 @@ import { useState } from "react";
 import GoogleIcon from "../../assets/google.svg";
 import styles from "../../styles/SignIn.module.css";
 import LoginIntro from "@/components/LoginIntro/loginIntro";
-import { getProviders, signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
-import AccessDenied from "@/components/accessDenied";
+
 export default function SignIn() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

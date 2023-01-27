@@ -38,7 +38,6 @@ const options = {
 
         //If no error and we have user data, return it
         if (user && bcrypt.compareSync(password, user.password)) {
-          console.log("USER", user);
           return user;
         }
 
@@ -53,7 +52,6 @@ const options = {
   },
   callbacks: {
     async jwt({ token, user }) {
-      console.log("JWT", user);
       if (user?.password) delete user.password;
       user && (token.user = user);
       return token;
