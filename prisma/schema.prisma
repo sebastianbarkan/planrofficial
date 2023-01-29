@@ -35,6 +35,18 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model QuestionSet {
+  id           String    @id @default(cuid())
+  count        Int       @default(0)
+  dates        String
+  budget       String
+  type         String
+  location     String
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -43,9 +55,11 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  questionSet   QuestionSet[]
   password      String?
   username      String?
 }
+
 
 model VerificationToken {
   identifier String

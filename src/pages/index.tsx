@@ -12,12 +12,16 @@ import {
 import { HomeQuestions } from "../context/HomeQuestions";
 import { TripDetails } from "../context/TripDetails";
 import { useGetChatGptResponse } from "@/utilities/api/useGetChatResponse";
+import { useGetQuestionCount } from "@/utilities/api/useGetQuestionCount";
+import prisma from "../../utilities/prismaClient";
+import { useUpdateQuestionSet } from "@/utilities/api/useUpdateQuestionSet";
 
 export default function Home({ session }) {
-  const [questionCount, setQuestionCount] = useState(0);
-  const { answers, setAnswers } = useContext(HomeQuestions);
-  const { setLocation, setDates, setDays } = useContext(TripDetails);
   const [answer, setAnswer] = useState("");
+  const { mutation } = useUpdateQuestionSet({
+    answer: answer,
+    userId: session.user.id,
+  });
   const [placeholders, setPlaceholders] = useState([
     "New York City, New York",
     "$300",
@@ -32,31 +36,22 @@ export default function Home({ session }) {
     ["When are you going?"],
   ]);
 
+  const { data: questionCount } = useGetQuestionCount({
+    userId: session.user.id,
+  });
+
   const [icons, setIcons] = useState([
-    <MapPinIcon key="map" className={styles.locationIcon} />,
-    <CurrencyDollarIcon key="dollar" className={styles.locationIcon} />,
-    <LightBulbIcon key="light" className={styles.locationIcon} />,
-    <CalendarIcon key="calendar" className={styles.locationIcon} />,
+    <MapPinIcon key="map" className={styles.questionIcon} />,
+    <CurrencyDollarIcon key="dollar" className={styles.questionIcon} />,
+    <LightBulbIcon key="light" className={styles.questionIcon} />,
+    <CalendarIcon key="calendar" className={styles.questionIcon} />,
   ]);
 
   const handleAnswer = (e) => {
     setAnswer(e.target.value);
   };
 
-  const handleNext = () => {
-    setAnswers([...answers, answer]);
-    setAnswer("");
-    setQuestionCount(questionCount + 1);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setAnswers([...answers, answer]);
-    setAnswer("");
-    setQuestionCount(0);
-  };
-
-  const { data: chatGptResponse } = useGetChatGptResponse(answers);
+  const { data: chatGptResponse } = useGetChatGptResponse(answer);
 
   return (
     <main className={styles.wrapper}>
@@ -74,11 +69,14 @@ export default function Home({ session }) {
           ></input>
         </div>
         {questionCount === 3 ? (
-          <button className={styles.nextButton} onClick={handleSubmit}>
-            Get my plan!
-          </button>
+          <button className={styles.nextButton}>Get my plan!</button>
         ) : (
-          <button className={styles.nextButton} onClick={handleNext}>
+          <button
+            className={styles.nextButton}
+            onClick={() =>
+              mutation.mutate({ answer: answer, userId: session.user.id })
+            }
+          >
             Next
           </button>
         )}
@@ -97,6 +95,26 @@ export async function getServerSideProps(context) {
       },
     };
   }
+
+  const questionSet = await prisma.questionSet.findFirst({
+    where: {
+      userId: session.user.id,
+    },
+  });
+
+  if (!questionSet) {
+    await prisma.questionSet.create({
+      data: {
+        count: 0,
+        dates: "",
+        location: "",
+        budget: "",
+        userId: session.user.id,
+        type: "",
+      },
+    });
+  }
+
   return {
     props: {
       session,

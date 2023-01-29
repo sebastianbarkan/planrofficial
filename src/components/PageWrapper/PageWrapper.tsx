@@ -20,44 +20,10 @@ interface Props {
 export function PageWrapper(props: Props) {
   const [queryClient] = useState(() => new QueryClient());
 
-  const [dates, setDates] = useState([]);
-
-  const [days, setDays] = useState([]);
-
-  const [location, setLocation] = useState();
-
-  const [answers, setAnswers] = useState([]);
-
-  useEffect(() => {
-    setDates(
-      localStorage.getItem("dates") === null
-        ? []
-        : JSON.parse(localStorage.getItem("dates"))
-    );
-
-    setDays(
-      localStorage.getItem("days") === null
-        ? []
-        : JSON.parse(localStorage.getItem("days"))
-    );
-
-    setLocation(
-      localStorage.getItem("location") === null
-        ? []
-        : JSON.parse(localStorage.getItem("location"))
-    );
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       {/* @ts-ignore */}
-      <HomeQuestions.Provider value={{ answers, setAnswers }}>
-        <TripDetails.Provider
-          value={{ location, setLocation, dates, setDates }}
-        >
-          {props.children}
-        </TripDetails.Provider>
-      </HomeQuestions.Provider>
+      {props.children}
     </QueryClientProvider>
   );
 }

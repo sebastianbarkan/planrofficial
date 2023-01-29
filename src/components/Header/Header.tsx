@@ -2,7 +2,7 @@ import React from "react";
 import styles from "../Header/Header.module.css";
 import HeaderLogo from "../../assets/headerLogo.svg";
 import { useRouter } from "next/router";
-
+import { signOut } from "next-auth/react";
 function Header({ name }) {
   let router = useRouter();
   return (
@@ -28,6 +28,7 @@ function Header({ name }) {
       </span>
       <span className={styles.profileWrap}>
         <p className={styles.name}>{name}</p>
+        <button onClick={signOut}>Sign Out</button>
       </span>
     </nav>
   );

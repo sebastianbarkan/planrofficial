@@ -33,7 +33,9 @@ export function useGetChatGptResponse(props: Props) {
     error,
     fetchStatus,
     refetch,
-  } = useQuery(["chatGptResponse"], () => fetchChatGptResponse(props));
+  } = useQuery(["chatGptResponse"], () => fetchChatGptResponse(props), {
+    enabled: false,
+  });
 
   return {
     data: data,
