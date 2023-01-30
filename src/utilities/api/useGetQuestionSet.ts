@@ -20,7 +20,7 @@ export async function fetchGetQuestionSet({ userId }: Props) {
 }
 
 export function useGetQuestionSet({ userId }: Props) {
-  const { data, isLoading, isError, isSuccess } = useQuery(
+  const { data, isLoading, isError, isSuccess, refetch } = useQuery(
     ["getQuestionSet"],
     () => fetchGetQuestionSet({ userId })
   );
@@ -29,5 +29,6 @@ export function useGetQuestionSet({ userId }: Props) {
     isLoading,
     isSuccess,
     isError,
+    refetch,
   };
 }

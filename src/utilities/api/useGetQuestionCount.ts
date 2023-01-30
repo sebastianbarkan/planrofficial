@@ -16,7 +16,7 @@ export async function fetchGetQuestionCount({ userId }: Props) {
 }
 
 export function useGetQuestionCount({ userId }: Props) {
-  const { data, isLoading, isError, isSuccess } = useQuery(
+  const { data, isLoading, isError, isSuccess, refetch } = useQuery(
     ["questionCount"],
     () => fetchGetQuestionCount({ userId })
   );
@@ -26,5 +26,6 @@ export function useGetQuestionCount({ userId }: Props) {
     isLoading,
     isError,
     isSuccess,
+    refetch,
   };
 }

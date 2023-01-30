@@ -15,13 +15,20 @@ import { useGetChatGptResponse } from "@/utilities/api/useGetChatResponse";
 import { useGetQuestionCount } from "@/utilities/api/useGetQuestionCount";
 import prisma from "../../utilities/prismaClient";
 import { useUpdateQuestionSet } from "@/utilities/api/useUpdateQuestionSet";
-
+import { useGetCities } from "@/utilities/api/useGetCities";
 export default function Home({ session }) {
   const [answer, setAnswer] = useState("");
+  const [cityQuery, setCityQuery] = useState("");
+  const [inputDisabled, setInputDisabled] = useState(false);
   const { mutation } = useUpdateQuestionSet({
     answer: answer,
     userId: session.user.id,
   });
+  const { refetch: cityRefetch } = useGetCities({
+    cityQuery,
+    setInputDisabled,
+  });
+
   const [placeholders, setPlaceholders] = useState([
     "New York City, New York",
     "$300",
@@ -51,6 +58,17 @@ export default function Home({ session }) {
     setAnswer(e.target.value);
   };
 
+  const handleCityQuery = (e) => {
+    setCityQuery(e.target.value);
+  };
+
+  useEffect(() => {
+    if (cityQuery.length > 0) {
+      setInputDisabled(true);
+      cityRefetch();
+    }
+  }, [cityQuery]);
+
   const { data: chatGptResponse } = useGetChatGptResponse(answer);
 
   return (
@@ -62,9 +80,10 @@ export default function Home({ session }) {
           {icons[questionCount]}
           <input
             type="text"
+            disabled={inputDisabled}
             className={styles.input}
-            value={answer}
-            onChange={handleAnswer}
+            value={questionCount === 0 ? cityQuery : answer}
+            onChange={questionCount === 0 ? handleCityQuery : handleAnswer}
             placeholder={placeholders[questionCount]}
           ></input>
         </div>
@@ -73,9 +92,12 @@ export default function Home({ session }) {
         ) : (
           <button
             className={styles.nextButton}
-            onClick={() =>
-              mutation.mutate({ answer: answer, userId: session.user.id })
-            }
+            onClick={() => {
+              return mutation.mutate({
+                answer: answer,
+                userId: session.user.id,
+              });
+            }}
           >
             Next
           </button>
