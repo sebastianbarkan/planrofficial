@@ -2,7 +2,7 @@ import styles from "@/styles/Home.module.css";
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Header from "@/components/Header/Header";
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import {
   MapPinIcon,
   CurrencyDollarIcon,
@@ -16,18 +16,33 @@ import { useGetQuestionCount } from "@/utilities/api/useGetQuestionCount";
 import prisma from "../../utilities/prismaClient";
 import { useUpdateQuestionSet } from "@/utilities/api/useUpdateQuestionSet";
 import { useGetCities } from "@/utilities/api/useGetCities";
+import LocationDropdown from "@/components/LocationDropdown/LocationDropdown";
+import { RangeDatePicker } from "react-google-flight-datepicker";
+import "react-google-flight-datepicker/dist/main.css";
+
 export default function Home({ session }) {
   const [answer, setAnswer] = useState("");
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
   const [cityQuery, setCityQuery] = useState("");
   const [inputDisabled, setInputDisabled] = useState(false);
   const { mutation } = useUpdateQuestionSet({
     answer: answer,
     userId: session.user.id,
   });
-  const { refetch: cityRefetch } = useGetCities({
+
+  const { refetch: cityRefetch, data: cityData } = useGetCities({
     cityQuery,
     setInputDisabled,
   });
+  const { data: chatGptResponse, refetch: chatGptResponseRefetch } =
+    useGetChatGptResponse({ userId: session.user.id });
+
+  const handleDateChange = (start, end) => {
+    setStartDate(start);
+    setEndDate(end);
+    setAnswer(`${start} to ${end}`);
+  };
 
   const [placeholders, setPlaceholders] = useState([
     "New York City, New York",
@@ -35,7 +50,6 @@ export default function Home({ session }) {
     "Family getaway",
     "1/14/23 to 1/20/23",
   ]);
-
   const [questions, setQuestions] = useState([
     [`Hey ${session.user.username}, Where are you going?`],
     ["What's your budget?"],
@@ -62,14 +76,27 @@ export default function Home({ session }) {
     setCityQuery(e.target.value);
   };
 
-  useEffect(() => {
-    if (cityQuery.length > 0) {
-      setInputDisabled(true);
-      cityRefetch();
+  const handleGetPlan = () => {
+    mutation.mutate({
+      answer: answer,
+      userId: session.user.id,
+    });
+    if (mutation.isSuccess && questionCount === 3) {
+      console.log("here");
+      chatGptResponseRefetch();
     }
-  }, [cityQuery]);
+  };
 
-  const { data: chatGptResponse } = useGetChatGptResponse(answer);
+  useEffect(() => {
+    const triggerCityFetch = setTimeout(() => {
+      if (cityQuery.length > 0) {
+        setInputDisabled(true);
+        cityRefetch();
+      }
+    }, 1000);
+
+    return () => clearTimeout(triggerCityFetch);
+  }, [cityQuery]);
 
   return (
     <main className={styles.wrapper}>
@@ -77,18 +104,44 @@ export default function Home({ session }) {
       <section className={styles.main}>
         <h1 className={styles.question}>{questions[questionCount]}</h1>
         <div className={styles.inputWrap}>
-          {icons[questionCount]}
-          <input
-            type="text"
-            disabled={inputDisabled}
-            className={styles.input}
-            value={questionCount === 0 ? cityQuery : answer}
-            onChange={questionCount === 0 ? handleCityQuery : handleAnswer}
-            placeholder={placeholders[questionCount]}
-          ></input>
+          {questionCount === 3 ? (
+            <RangeDatePicker
+              startDate={startDate}
+              endDate={endDate}
+              onChange={(startDate, endDate) =>
+                handleDateChange(startDate, endDate)
+              }
+              startDatePlaceholder="Start Date"
+              endDatePlaceholder="End Date"
+              className={styles.rangeDatePicker}
+            />
+          ) : (
+            <>
+              {icons[questionCount]}
+              <input
+                type="text"
+                ref={(input) => input && input.focus()}
+                autoFocus
+                disabled={inputDisabled}
+                className={styles.input}
+                value={questionCount === 0 ? cityQuery : answer}
+                onChange={questionCount === 0 ? handleCityQuery : handleAnswer}
+                placeholder={placeholders[questionCount]}
+              ></input>
+            </>
+          )}
+          <div className={styles.dropdownWrap}>
+            <LocationDropdown
+              cityData={cityData}
+              questionCount={questionCount}
+              setAnswer={setAnswer}
+            />
+          </div>
         </div>
         {questionCount === 3 ? (
-          <button className={styles.nextButton}>Get my plan!</button>
+          <button className={styles.nextButton} onClick={handleGetPlan}>
+            Get my plan!
+          </button>
         ) : (
           <button
             className={styles.nextButton}

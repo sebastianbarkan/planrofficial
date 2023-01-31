@@ -1,0 +1,24 @@
+.wrapper {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  top: 0;
+  left: 0;
+  border-radius: 8px;
+  background-color: white;
+}
+
+.itemWrap {
+  background-color: white;
+  cursor: pointer;
+  padding: 1rem 1rem;
+  border-radius: 8px;
+}
+
+.itemWrap:hover {
+  background-color: aliceblue;
+}
+
+.dropdownWrap {
+  border-radius: 8px;
+}

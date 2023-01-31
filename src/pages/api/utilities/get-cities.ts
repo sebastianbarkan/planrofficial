@@ -15,14 +15,12 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
       },
     };
 
-    console.log("cityqAOP", req.body);
     const cities = await fetch(
-      `https://wft-geo-db.p.rapidapi.com/v1/geo/cities?namePrefix=${cityQuery}`,
+      `https://wft-geo-db.p.rapidapi.com/v1/geo/cities?namePrefix=${cityQuery}&sort=-population`,
       options
     )
       .then((response) => response.json())
       .then((response) => {
-        console.log("api", response);
         return response;
       })
       .catch((err) => console.error(err));

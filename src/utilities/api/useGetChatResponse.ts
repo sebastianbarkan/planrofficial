@@ -1,29 +1,39 @@
 import { useQuery } from "@tanstack/react-query";
+import { useGetQuestionSetAnswers } from "./useGetQuestionSetAnswers";
 
-interface Props {
-  date: string;
+interface FetchProps {
+  dates: string;
   type: string;
   budget: string;
   location: string;
 }
 
-export async function fetchChatGptResponse(props: Props) {
-  return await fetch(
-    "http://localhost:3000/api/chatgpt/get-chat-gpt-response",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        date: props.date,
-        type: props.type,
-        budget: props.budget,
-        location: props.location,
-      }),
-    }
-  );
+interface Props {
+  userId: string;
 }
 
-export function useGetChatGptResponse(props: Props) {
+export async function fetchChatGptResponse({
+  dates,
+  type,
+  budget,
+  location,
+}: FetchProps) {
+  console.log("CHT", dates, location);
+  return await fetch("http://localhost:3000/api/chatgpt/get-chatgpt-response", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      dates: dates,
+      type: type,
+      budget: budget,
+      location: location,
+    }),
+  });
+}
+
+export function useGetChatGptResponse({ userId }: Props) {
+  const { data: questionSetAnswers } = useGetQuestionSetAnswers({ userId });
+  console.log("GUESS", questionSetAnswers);
   const {
     isLoading,
     isFetching,
@@ -33,9 +43,13 @@ export function useGetChatGptResponse(props: Props) {
     error,
     fetchStatus,
     refetch,
-  } = useQuery(["chatGptResponse"], () => fetchChatGptResponse(props), {
-    enabled: false,
-  });
+  } = useQuery(
+    ["chatGptResponse"],
+    () => fetchChatGptResponse(questionSetAnswers),
+    {
+      enabled: false,
+    }
+  );
 
   return {
     data: data,

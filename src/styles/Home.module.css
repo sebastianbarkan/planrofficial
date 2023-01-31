@@ -4,7 +4,7 @@
 
 .wrapper {
   min-height: 100vh;
-  max-height: 100vh;
+  max-height: 100%;
   width: 100%;
   background-color: #f3f3f3;
   display: flex;
@@ -44,6 +44,15 @@
   position: relative;
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.dropdownWrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .questionIcon {
@@ -66,4 +75,10 @@
 
 .nextButton:hover {
   background-color: #fdbc71;
+}
+
+.rangeDatePicker {
+  width: 100%;
+  color: #fdbc71;
+  min-width: 500px;
 }
