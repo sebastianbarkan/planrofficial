@@ -10,6 +10,7 @@ interface FetchProps {
 
 interface Props {
   userId: string;
+  questionSetAnswers: Object;
 }
 
 export async function fetchChatGptResponse({
@@ -31,9 +32,8 @@ export async function fetchChatGptResponse({
   });
 }
 
-export function useGetChatGptResponse({ userId }: Props) {
-  const { data: questionSetAnswers } = useGetQuestionSetAnswers({ userId });
-  console.log("GUESS", questionSetAnswers);
+export function useGetChatGptResponse({ userId, questionSetAnswers }: Props) {
+  console.log("APU", userId, questionSetAnswers);
   const {
     isLoading,
     isFetching,
@@ -44,10 +44,10 @@ export function useGetChatGptResponse({ userId }: Props) {
     fetchStatus,
     refetch,
   } = useQuery(
-    ["chatGptResponse"],
-    () => fetchChatGptResponse(questionSetAnswers),
+    ["chatGptResponse", questionSetAnswers],
+    () => fetchChatGptResponse(questionSetAnswers, userId),
     {
-      enabled: false,
+      enabled: !!questionSetAnswers,
     }
   );
 

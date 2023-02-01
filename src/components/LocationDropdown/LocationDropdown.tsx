@@ -4,13 +4,23 @@ import styles from "./LocationDropdown.module.css";
 interface Props {
   cityData: Object;
   questionCount: number;
-  setAnswer: Function;
+  mutation: Object;
+  userId: string;
 }
 
-function LocationDropdown({ cityData, questionCount, setAnswer }: Props) {
+function LocationDropdown({
+  cityData,
+  questionCount,
+  mutation,
+  userId,
+}: Props) {
   const handleSelectOption = (city: string, country: string) => {
-    setAnswer(`${city}, ${country}`);
+    mutation.mutate({
+      answer: `${city}, ${country}`,
+      userId: userId,
+    });
   };
+
   return (
     <div className={styles.wrapper}>
       {questionCount === 0 && cityData !== undefined ? (

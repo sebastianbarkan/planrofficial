@@ -13,19 +13,21 @@ export async function fetchQuestionSetAnswers({ userId }: Props) {
   )
     .then((res) => res.json())
     .then((data) => {
-      console.log("first", data.answers);
       return data.answers;
     });
 }
 
 export function useGetQuestionSetAnswers({ userId }: Props) {
-  const { data } = useQuery(["getQuestionSetAnswers"], () =>
-    fetchQuestionSetAnswers({ userId })
+  const { data, refetch, isSuccess } = useQuery(
+    ["getQuestionSetAnswers"],
+    () => fetchQuestionSetAnswers({ userId }),
+    {
+      enabled: false,
+    }
   );
-
-  console.log("ORIG", data);
-
   return {
     data: data,
+    refetch,
+    isSuccess,
   };
 }

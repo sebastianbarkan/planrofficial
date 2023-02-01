@@ -19,6 +19,7 @@ import { useGetCities } from "@/utilities/api/useGetCities";
 import LocationDropdown from "@/components/LocationDropdown/LocationDropdown";
 import { RangeDatePicker } from "react-google-flight-datepicker";
 import "react-google-flight-datepicker/dist/main.css";
+import { useGetQuestionSetAnswers } from "@/utilities/api/useGetQuestionSetAnswers";
 
 export default function Home({ session }) {
   const [answer, setAnswer] = useState("");
@@ -35,8 +36,15 @@ export default function Home({ session }) {
     cityQuery,
     setInputDisabled,
   });
+
+  const {
+    data: questionSetAnswers,
+    refetch: questionSetAnswersRefetch,
+    isSuccess: questionSetAnwersSuccess,
+  } = useGetQuestionSetAnswers({ userId: session.user.id });
+
   const { data: chatGptResponse, refetch: chatGptResponseRefetch } =
-    useGetChatGptResponse({ userId: session.user.id });
+    useGetChatGptResponse({ userId: session.user.id, questionSetAnswers });
 
   const handleDateChange = (start, end) => {
     setStartDate(start);
@@ -82,8 +90,12 @@ export default function Home({ session }) {
       userId: session.user.id,
     });
     if (mutation.isSuccess && questionCount === 3) {
-      console.log("here");
-      chatGptResponseRefetch();
+      console.log("getplan");
+      questionSetAnswersRefetch();
+      if (questionSetAnwersSuccess) {
+        console.log("suces");
+        chatGptResponseRefetch();
+      }
     }
   };
 
@@ -134,7 +146,8 @@ export default function Home({ session }) {
             <LocationDropdown
               cityData={cityData}
               questionCount={questionCount}
-              setAnswer={setAnswer}
+              mutation={mutation}
+              userId={session.user.id}
             />
           </div>
         </div>
