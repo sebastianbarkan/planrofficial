@@ -40,7 +40,7 @@ export default function Home({ session }) {
   const {
     data: questionSetAnswers,
     refetch: questionSetAnswersRefetch,
-    isSuccess: questionSetAnwersSuccess,
+    isSuccess: questionSetAnswersSuccess,
   } = useGetQuestionSetAnswers({ userId: session.user.id });
 
   const { data: chatGptResponse, refetch: chatGptResponseRefetch } =
@@ -84,18 +84,14 @@ export default function Home({ session }) {
     setCityQuery(e.target.value);
   };
 
-  const handleGetPlan = () => {
+  const handleGetPlan = async () => {
     mutation.mutate({
       answer: answer,
       userId: session.user.id,
     });
+
     if (mutation.isSuccess && questionCount === 3) {
-      console.log("getplan");
       questionSetAnswersRefetch();
-      if (questionSetAnwersSuccess) {
-        console.log("suces");
-        chatGptResponseRefetch();
-      }
     }
   };
 

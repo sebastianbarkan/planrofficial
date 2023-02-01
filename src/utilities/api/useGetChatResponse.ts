@@ -1,11 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useGetQuestionSetAnswers } from "./useGetQuestionSetAnswers";
+import { useRefreshQuestionSet } from "./useRefreshQuestionSet";
 
 interface FetchProps {
   dates: string;
   type: string;
   budget: string;
   location: string;
+  userId: string;
 }
 
 interface Props {
@@ -18,6 +20,7 @@ export async function fetchChatGptResponse({
   type,
   budget,
   location,
+  userId,
 }: FetchProps) {
   console.log("CHT", dates, location);
   return await fetch("http://localhost:3000/api/chatgpt/get-chatgpt-response", {
@@ -28,12 +31,16 @@ export async function fetchChatGptResponse({
       type: type,
       budget: budget,
       location: location,
+      userId: userId,
     }),
   });
 }
 
 export function useGetChatGptResponse({ userId, questionSetAnswers }: Props) {
   console.log("APU", userId, questionSetAnswers);
+
+  const queryClient = useQueryClient();
+
   const {
     isLoading,
     isFetching,
@@ -48,6 +55,7 @@ export function useGetChatGptResponse({ userId, questionSetAnswers }: Props) {
     () => fetchChatGptResponse(questionSetAnswers, userId),
     {
       enabled: !!questionSetAnswers,
+      onSuccess: () => {},
     }
   );
 
