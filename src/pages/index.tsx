@@ -47,6 +47,7 @@ export default function Home({ session }) {
     useGetChatGptResponse({ userId: session.user.id, questionSetAnswers });
 
   const handleDateChange = (start, end) => {
+    console.log("dates", start, end);
     setStartDate(start);
     setEndDate(end);
     setAnswer(`${start} to ${end}`);

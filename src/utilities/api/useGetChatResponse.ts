@@ -22,7 +22,7 @@ export async function fetchChatGptResponse({
   location,
   userId,
 }: FetchProps) {
-  console.log("CHT", dates, location);
+  console.log("RUN CHATGPT REQUEST");
   return await fetch("http://localhost:3000/api/chatgpt/get-chatgpt-response", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -33,14 +33,16 @@ export async function fetchChatGptResponse({
       location: location,
       userId: userId,
     }),
-  });
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("CHATRESPONSE", data);
+      return data;
+    });
 }
 
 export function useGetChatGptResponse({ userId, questionSetAnswers }: Props) {
-  console.log("APU", userId, questionSetAnswers);
-
-  const queryClient = useQueryClient();
-
+  const twentyFourHoursInMs = 1000 * 60 * 60 * 24;
   const {
     isLoading,
     isFetching,
@@ -55,7 +57,14 @@ export function useGetChatGptResponse({ userId, questionSetAnswers }: Props) {
     () => fetchChatGptResponse(questionSetAnswers, userId),
     {
       enabled: !!questionSetAnswers,
-      onSuccess: () => {},
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      retry: false,
+      staleTime: twentyFourHoursInMs,
+      onSuccess: () => {
+        console.log("QUERY", data);
+      },
     }
   );
 
